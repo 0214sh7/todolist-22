@@ -1,40 +1,69 @@
 <script setup>
 import { ref } from "vue";
 
-const items = ref([
-  { name: "たまご", price: 100 },
-  { name: "りんご", price: 160 },
-]);
+const undoneitems = ref([]);
+
+const doneitems = ref([]);
+
+let newItemId = 0;
 const newItemName = ref("");
-const newItemPrice = ref(0);
+const newItemDone = ref(false);
 
 const addItem = () => {
   if (newItemName.value != "") {
-    items.value.push({ name: newItemName.value, price: newItemPrice.value });
+    undoneitems.value.push({
+      id: newItemId,
+      name: newItemName.value,
+      done: false,
+    });
+    newItemId++;
     newItemName.value = "";
-    newItemPrice.value = 0;
+    newItemDone.value = false;
+  }
+};
+
+const TaskDone = (id) => {
+  const index = undoneitems.value.findIndex((item) => item.id === id);
+  if (index !== -1) {
+    undoneitems.value[index].done = true;
+    let tmp = undoneitems.value.splice(index, 1);
+    doneitems.value.push(tmp[0]);
   }
 };
 </script>
 
 <template>
   <div>
-    <div>ItemList</div>
-    <div v-for="item in items" :key="item.name">
-      <div class="item" :class="{ over500: item.price >= 500 }">
-        <div class="name">名前: {{ item.name }}</div>
-        <div class="price">{{ item.price }} 円</div>
-        <div v-if="item.price >= 10000">高額商品</div>
+    <div id="Lists" class="flex">
+      <div>
+        <div class="items">UndoneList</div>
+        <div v-for="item in undoneitems" :key="item.id">
+          <div class="item">
+            <!-- <div class="id">ID: {{ item.id }}</div> -->
+            <div class="name">{{ item.name }}</div>
+            <!-- <div class="done">{{ item.done }}</div> -->
+            <div>
+              <button @click="TaskDone(item.id)">完了！</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="items">DoneList</div>
+        <div v-for="item in doneitems" :key="item.id">
+          <div class="item">
+            <!-- <div class="id">ID: {{ item.id }}</div> -->
+            <div class="name">{{ item.name }}</div>
+            <!-- <div class="done">{{ item.done }}</div> -->
+          </div>
+        </div>
       </div>
     </div>
+
     <div>
       <label>
         名前
         <input v-model="newItemName" type="text" />
-      </label>
-      <label>
-        価格
-        <input v-model="newItemPrice" type="number" />
       </label>
       <button @click="addItem">add</button>
     </div>
@@ -42,6 +71,16 @@ const addItem = () => {
 </template>
 
 <style>
+.flex {
+  display: flex;
+  justify-content: center;
+}
+.items {
+  margin: 30px;
+}
+.item {
+  margin: 10px;
+}
 .over500 {
   color: red;
 }
